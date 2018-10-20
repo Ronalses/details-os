@@ -1,5 +1,12 @@
-const { app } = require('electron')
+const { app, BrowserWindow } = require('electron')
+
+let mainWindow
 
 app.on('ready', () => {
-    console.log('Electron esta listo para crear la ventana,(Renderrr)')
+    mainWindow = new BrowserWindow({ height: 600, width: 500 })
+    mainWindow.loadFile('index.html')
+})
+
+app.on('window-all-closed', () => {
+    app.quit()
 })
