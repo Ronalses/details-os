@@ -1,7 +1,15 @@
-.container{
+html, body{
+    margin: 0px;
+    padding: 0px;
+    background-color: #111;
+    font-family: 'Roboto', sans-serif;
+    color: #ecf0f1;
     text-align: center;
 }
 
-.details span{
-    font-size: 20px;
+.details div {
+    margin: 10px 0px;
+}
+.detail-title{
+    font-weight: bold;
 }
