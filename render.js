@@ -16,7 +16,7 @@ function getGpuLinux(){
                 let keyword = line.split(':')
                 result[keyword[0].trim()] = keyword[1].trim()
             }
-            resolve(result)
+            resolve({description: `${result.fabricante} - ${result.producto}`})
         })
     })
 }
