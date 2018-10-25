@@ -1,7 +1,7 @@
 const os = require('os')
 const { exec } = require('child_process')
 
-function getGpu() {
+function getGpuLinux(){
     return new Promise((resolve, reject) => {
         exec('lshw -C display', (err, stdout, string) => {
             if (err) reject(err)
@@ -21,7 +21,38 @@ function getGpu() {
     })
 }
 
-function getInfo() {
+function getGpuWin(){
+    return new Promise((resolve, reject) => {
+        exec('wmic path win32_VideoController get name', (err, stdout, string) => {
+            if (err) reject(err)
+
+            let gpuDescription = stdout.trim().split('\n')[1]
+
+            resolve({description: gpuDescription})
+        })
+    })
+}
+
+function getGpu() {
+    let gpuPromise
+    switch (os.platform()) {
+        case 'linux':
+            gpuPromise = getGpuLinux()
+            break;
+
+        case 'win32':
+            gpuPromise = getGpuWin()
+            break;
+    
+        default:
+            gpuPromise = Promise.resolve()
+            break;
+    }
+    return gpuPromise
+}
+
+async function getInfo() {
+    let dataGpu = await getGpu()
 
     let data = {
         hotname: `${os.hostname()}`,
@@ -29,19 +60,20 @@ function getInfo() {
         ram: `${os.totalmem()}`,
         arch: `${os.arch() === 'x64' ? '64 Bits' : '32 Bits'}`,
         platform: `${os.type}`,
-        disk: `${os.freemem()}`
+        disk: `${os.freemem()}`,
+        gpu: `${dataGpu.description}`
     }
 
     return data
 }
 
-let dataInfo = getInfo()
-
-document.getElementById('hotname').innerHTML = dataInfo.hotname
-document.getElementById('cpu').innerHTML = dataInfo.cpu
-document.getElementById('ram').innerHTML = dataInfo.ram
-document.getElementById('arch').innerHTML = dataInfo.arch
-document.getElementById('platform').innerHTML = dataInfo.platform
-document.getElementById('disk').innerHTML = dataInfo.disk
-
-getGpu().then(data => console.log(data.fabricante))
+getInfo()
+    .then(dataInfo => {
+        document.getElementById('hotname').innerHTML = dataInfo.hotname
+        document.getElementById('cpu').innerHTML = dataInfo.cpu
+        document.getElementById('ram').innerHTML = dataInfo.ram
+        document.getElementById('arch').innerHTML = dataInfo.arch
+        document.getElementById('platform').innerHTML = dataInfo.platform
+        document.getElementById('disk').innerHTML = dataInfo.disk
+        document.getElementById('gpu').innerHTML = dataInfo.gpu
+    })
